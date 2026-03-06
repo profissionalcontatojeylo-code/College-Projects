@@ -1,0 +1,389 @@
+import os
+from datetime import datetime
+
+clinica_nome = "CLINICAVIDA+"
+
+pacientes = []
+medicos = []
+exames = []
+historico = []
+agendamentos = []
+
+
+def limpar():
+    os.system("cls")
+
+
+def linha():
+    print("=" * 50)
+
+
+def capa():
+
+    limpar()
+
+    print("\n")
+    print("*" * 50)
+    print("CLINICAVIDA+".center(50))
+    print("SISTEMA DE GESTÃO DA CLÍNICA".center(50))
+    print("\n")
+    print("BEM VINDO".center(50))
+    print("\n")
+    print("Pressione ENTER para iniciar".center(50))
+    print("*" * 50)
+
+    input()
+
+    limpar()
+
+
+def titulo(txt):
+    linha()
+    print(clinica_nome.center(50))
+    print(txt.center(50))
+    linha()
+
+
+def validar_data():
+
+    while True:
+
+        data = input("Data (DD/MM/AAAA) ou 0 para voltar: ")
+
+        if data == "0":
+            return None
+
+        try:
+            datetime.strptime(data, "%d/%m/%Y")
+            return data
+        except:
+            print("Data inválida. Use DD/MM/AAAA.")
+
+
+def formatar_telefone():
+
+    while True:
+
+        ddd = input("DDD (ou 0 para voltar): ")
+
+        if ddd == "0":
+            return None
+
+        numero = input("Número (9 dígitos): ")
+
+        if numero.isdigit() and len(numero) == 9:
+            return f"+55 ({ddd}) {numero[:5]}-{numero[5:]}"
+
+        print("Número inválido.")
+
+
+def cadastrar_paciente():
+
+    titulo("CADASTRO DE PACIENTE")
+
+    nome = input("Nome completo (0 para voltar): ")
+
+    if nome == "0":
+        return
+
+    while True:
+
+        idade = input("Idade: ")
+
+        if idade.isdigit():
+            idade = int(idade)
+            break
+
+        print("Idade inválida.")
+
+    telefone = formatar_telefone()
+
+    if telefone is None:
+        return
+
+    pacientes.append({
+        "nome": nome,
+        "idade": idade,
+        "telefone": telefone
+    })
+
+    print("Paciente cadastrado!")
+
+
+def cadastrar_pacientes_em_massa():
+
+    titulo("CADASTRO EM MASSA")
+
+    while True:
+
+        qtd = input("Quantos pacientes deseja cadastrar? (0 para voltar): ")
+
+        if qtd == "0":
+            return
+
+        if qtd.isdigit():
+            qtd = int(qtd)
+            break
+
+        print("Número inválido.")
+
+    for i in range(qtd):
+
+        print(f"\nPaciente {i+1}")
+
+        nome = input("Nome completo: ")
+
+        while True:
+
+            idade = input("Idade: ")
+
+            if idade.isdigit():
+                idade = int(idade)
+                break
+
+            print("Idade inválida.")
+
+        telefone = formatar_telefone()
+
+        if telefone is None:
+            continue
+
+        pacientes.append({
+            "nome": nome,
+            "idade": idade,
+            "telefone": telefone
+        })
+
+        print("Paciente cadastrado!")
+
+
+def buscar_paciente():
+
+    titulo("BUSCAR PACIENTE")
+
+    busca = input("Digite nome ou sobrenome (0 para voltar): ")
+
+    if busca == "0":
+        return
+
+    resultados = []
+
+    for p in pacientes:
+
+        if busca.lower() in p["nome"].lower():
+            resultados.append(p)
+
+    if len(resultados) == 0:
+
+        print("Nenhum paciente encontrado.")
+        return
+
+    for r in resultados:
+
+        linha()
+        print("Nome:", r["nome"])
+        print("Idade:", r["idade"])
+        print("Telefone:", r["telefone"])
+
+
+def cadastrar_medico():
+
+    titulo("CADASTRO DE MÉDICO")
+
+    nome = input("Nome do médico (0 para voltar): ")
+
+    if nome == "0":
+        return
+
+    especialidade = input("Especialidade: ")
+
+    medicos.append({
+        "nome": nome,
+        "especialidade": especialidade
+    })
+
+    print("Médico cadastrado!")
+
+
+def cadastrar_exame():
+
+    titulo("CADASTRO DE EXAME")
+
+    nome = input("Nome do exame (0 para voltar): ")
+
+    if nome == "0":
+        return
+
+    valor = input("Valor do exame: ")
+
+    exames.append({
+        "nome": nome,
+        "valor": valor
+    })
+
+    print("Exame cadastrado!")
+
+
+def agendar_consulta():
+
+    titulo("AGENDAR CONSULTA")
+
+    paciente = input("Paciente (0 para voltar): ")
+
+    if paciente == "0":
+        return
+
+    medico = input("Médico: ")
+
+    data = validar_data()
+
+    if data is None:
+        return
+
+    horario = input("Horário (ex: 14:00): ")
+
+    agendamentos.append({
+        "paciente": paciente,
+        "medico": medico,
+        "data": data,
+        "horario": horario
+    })
+
+    historico.append(paciente)
+
+    print("Consulta agendada!")
+
+
+def listar_agendamentos():
+
+    titulo("AGENDA")
+
+    if len(agendamentos) == 0:
+
+        print("Nenhum agendamento.")
+        return
+
+    for a in agendamentos:
+
+        linha()
+        print("Paciente:", a["paciente"])
+        print("Médico:", a["medico"])
+        print("Data:", a["data"])
+        print("Horário:", a["horario"])
+
+
+def historico_pacientes():
+
+    titulo("HISTÓRICO")
+
+    if len(historico) == 0:
+
+        print("Nenhum atendimento.")
+        return
+
+    for h in historico:
+
+        print("Paciente atendido:", h)
+
+
+def estatisticas():
+
+    titulo("ESTATÍSTICAS")
+
+    if len(pacientes) == 0:
+
+        print("Nenhum paciente.")
+        return
+
+    total = len(pacientes)
+
+    soma = sum(p["idade"] for p in pacientes)
+
+    media = soma / total
+
+    mais_novo = min(pacientes, key=lambda x: x["idade"])
+    mais_velho = max(pacientes, key=lambda x: x["idade"])
+
+    print("Total:", total)
+    print("Idade média:", round(media, 2))
+    print("Mais novo:", mais_novo["nome"])
+    print("Mais velho:", mais_velho["nome"])
+
+
+def listar_pacientes():
+
+    titulo("PACIENTES")
+
+    if len(pacientes) == 0:
+
+        print("Nenhum paciente.")
+        return
+
+    for p in pacientes:
+
+        linha()
+        print("Nome:", p["nome"])
+        print("Idade:", p["idade"])
+        print("Telefone:", p["telefone"])
+
+
+capa()
+
+while True:
+
+    titulo("MENU PRINCIPAL")
+
+    print("1 - Cadastrar paciente")
+    print("2 - Cadastro em massa")
+    print("3 - Buscar paciente")
+    print("4 - Cadastrar médico")
+    print("5 - Cadastrar exame")
+    print("6 - Agendar consulta")
+    print("7 - Ver agendamentos")
+    print("8 - Histórico")
+    print("9 - Estatísticas")
+    print("10 - Listar pacientes")
+    print("11 - Sair")
+
+    linha()
+
+    opcao = input("Escolha: ")
+
+    limpar()
+
+    if opcao == "1":
+        cadastrar_paciente()
+
+    elif opcao == "2":
+        cadastrar_pacientes_em_massa()
+
+    elif opcao == "3":
+        buscar_paciente()
+
+    elif opcao == "4":
+        cadastrar_medico()
+
+    elif opcao == "5":
+        cadastrar_exame()
+
+    elif opcao == "6":
+        agendar_consulta()
+
+    elif opcao == "7":
+        listar_agendamentos()
+
+    elif opcao == "8":
+        historico_pacientes()
+
+    elif opcao == "9":
+        estatisticas()
+
+    elif opcao == "10":
+        listar_pacientes()
+
+    elif opcao == "11":
+        print("Encerrando sistema...")
+        break
+
+    else:
+        print("Opção inválida.")
