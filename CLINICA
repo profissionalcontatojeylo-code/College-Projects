@@ -1,40 +1,25 @@
 import os
-from datetime import datetime
+import sys
 
 clinica_nome = "CLINICAVIDA+"
 
 pacientes = []
 medicos = []
-exames = []
-historico = []
 agendamentos = []
+laudos = []
 
 
 def limpar():
-    os.system("cls")
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def linha():
     print("=" * 50)
 
 
-def capa():
-
-    limpar()
-
-    print("\n")
-    print("*" * 50)
-    print("CLINICAVIDA+".center(50))
-    print("SISTEMA DE GESTÃO DA CLÍNICA".center(50))
-    print("\n")
-    print("BEM VINDO".center(50))
-    print("\n")
-    print("Pressione ENTER para iniciar".center(50))
-    print("*" * 50)
-
-    input()
-
-    limpar()
+def sair():
+    print("\nEncerrando sistema...")
+    sys.exit()
 
 
 def titulo(txt):
@@ -44,62 +29,28 @@ def titulo(txt):
     linha()
 
 
-def validar_data():
+# =================================
+# SECRETÁRIA
+# =================================
 
-    while True:
-
-        data = input("Data (DD/MM/AAAA) ou 0 para voltar: ")
-
-        if data == "0":
-            return None
-
-        try:
-            datetime.strptime(data, "%d/%m/%Y")
-            return data
-        except:
-            print("Data inválida. Use DD/MM/AAAA.")
-
-
-def formatar_telefone():
-
-    while True:
-
-        ddd = input("DDD (ou 0 para voltar): ")
-
-        if ddd == "0":
-            return None
-
-        numero = input("Número (9 dígitos): ")
-
-        if numero.isdigit() and len(numero) == 9:
-            return f"+55 ({ddd}) {numero[:5]}-{numero[5:]}"
-
-        print("Número inválido.")
-
-
-def cadastrar_paciente():
+def cadastrar_paciente(nome_forcado=None):
 
     titulo("CADASTRO DE PACIENTE")
 
-    nome = input("Nome completo (0 para voltar): ")
-
-    if nome == "0":
-        return
+    if nome_forcado:
+        nome = nome_forcado
+        print("Nome:", nome)
+    else:
+        nome = input("Nome: ")
 
     while True:
-
         idade = input("Idade: ")
-
         if idade.isdigit():
             idade = int(idade)
             break
+        print("Digite apenas números.")
 
-        print("Idade inválida.")
-
-    telefone = formatar_telefone()
-
-    if telefone is None:
-        return
+    telefone = input("Telefone: ")
 
     pacientes.append({
         "nome": nome,
@@ -110,91 +61,11 @@ def cadastrar_paciente():
     print("Paciente cadastrado!")
 
 
-def cadastrar_pacientes_em_massa():
-
-    titulo("CADASTRO EM MASSA")
-
-    while True:
-
-        qtd = input("Quantos pacientes deseja cadastrar? (0 para voltar): ")
-
-        if qtd == "0":
-            return
-
-        if qtd.isdigit():
-            qtd = int(qtd)
-            break
-
-        print("Número inválido.")
-
-    for i in range(qtd):
-
-        print(f"\nPaciente {i+1}")
-
-        nome = input("Nome completo: ")
-
-        while True:
-
-            idade = input("Idade: ")
-
-            if idade.isdigit():
-                idade = int(idade)
-                break
-
-            print("Idade inválida.")
-
-        telefone = formatar_telefone()
-
-        if telefone is None:
-            continue
-
-        pacientes.append({
-            "nome": nome,
-            "idade": idade,
-            "telefone": telefone
-        })
-
-        print("Paciente cadastrado!")
-
-
-def buscar_paciente():
-
-    titulo("BUSCAR PACIENTE")
-
-    busca = input("Digite nome ou sobrenome (0 para voltar): ")
-
-    if busca == "0":
-        return
-
-    resultados = []
-
-    for p in pacientes:
-
-        if busca.lower() in p["nome"].lower():
-            resultados.append(p)
-
-    if len(resultados) == 0:
-
-        print("Nenhum paciente encontrado.")
-        return
-
-    for r in resultados:
-
-        linha()
-        print("Nome:", r["nome"])
-        print("Idade:", r["idade"])
-        print("Telefone:", r["telefone"])
-
-
 def cadastrar_medico():
 
     titulo("CADASTRO DE MÉDICO")
 
-    nome = input("Nome do médico (0 para voltar): ")
-
-    if nome == "0":
-        return
-
+    nome = input("Nome do médico: ")
     especialidade = input("Especialidade: ")
 
     medicos.append({
@@ -205,42 +76,14 @@ def cadastrar_medico():
     print("Médico cadastrado!")
 
 
-def cadastrar_exame():
-
-    titulo("CADASTRO DE EXAME")
-
-    nome = input("Nome do exame (0 para voltar): ")
-
-    if nome == "0":
-        return
-
-    valor = input("Valor do exame: ")
-
-    exames.append({
-        "nome": nome,
-        "valor": valor
-    })
-
-    print("Exame cadastrado!")
-
-
-def agendar_consulta():
+def agendar_secretaria():
 
     titulo("AGENDAR CONSULTA")
 
-    paciente = input("Paciente (0 para voltar): ")
-
-    if paciente == "0":
-        return
-
-    medico = input("Médico: ")
-
-    data = validar_data()
-
-    if data is None:
-        return
-
-    horario = input("Horário (ex: 14:00): ")
+    paciente = input("Nome do paciente: ")
+    medico = input("Nome do médico: ")
+    data = input("Data: ")
+    horario = input("Horário: ")
 
     agendamentos.append({
         "paciente": paciente,
@@ -249,22 +92,33 @@ def agendar_consulta():
         "horario": horario
     })
 
-    historico.append(paciente)
-
     print("Consulta agendada!")
 
 
-def listar_agendamentos():
+def listar_pacientes():
 
-    titulo("AGENDA")
+    titulo("PACIENTES CADASTRADOS")
 
-    if len(agendamentos) == 0:
+    if not pacientes:
+        print("Nenhum paciente cadastrado.")
+        return
 
+    for p in pacientes:
+        linha()
+        print("Nome:", p["nome"])
+        print("Idade:", p["idade"])
+        print("Telefone:", p["telefone"])
+
+
+def agenda_completa():
+
+    titulo("AGENDA DA CLÍNICA")
+
+    if not agendamentos:
         print("Nenhum agendamento.")
         return
 
     for a in agendamentos:
-
         linha()
         print("Paciente:", a["paciente"])
         print("Médico:", a["medico"])
@@ -272,118 +126,235 @@ def listar_agendamentos():
         print("Horário:", a["horario"])
 
 
-def historico_pacientes():
+def menu_secretaria():
 
-    titulo("HISTÓRICO")
+    while True:
 
-    if len(historico) == 0:
+        titulo("MENU SECRETÁRIA")
 
-        print("Nenhum atendimento.")
-        return
+        print("1 - Cadastrar paciente")
+        print("2 - Cadastrar médico")
+        print("3 - Agendar consulta")
+        print("4 - Ver agenda")
+        print("5 - Listar pacientes")
+        print("0 - Sair")
 
-    for h in historico:
+        op = input("Escolha: ")
+        limpar()
 
-        print("Paciente atendido:", h)
+        if op == "1":
+            cadastrar_paciente()
 
+        elif op == "2":
+            cadastrar_medico()
 
-def estatisticas():
+        elif op == "3":
+            agendar_secretaria()
 
-    titulo("ESTATÍSTICAS")
+        elif op == "4":
+            agenda_completa()
 
-    if len(pacientes) == 0:
+        elif op == "5":
+            listar_pacientes()
 
-        print("Nenhum paciente.")
-        return
-
-    total = len(pacientes)
-
-    soma = sum(p["idade"] for p in pacientes)
-
-    media = soma / total
-
-    mais_novo = min(pacientes, key=lambda x: x["idade"])
-    mais_velho = max(pacientes, key=lambda x: x["idade"])
-
-    print("Total:", total)
-    print("Idade média:", round(media, 2))
-    print("Mais novo:", mais_novo["nome"])
-    print("Mais velho:", mais_velho["nome"])
+        elif op == "0":
+            sair()
 
 
-def listar_pacientes():
+# =================================
+# PACIENTE
+# =================================
 
-    titulo("PACIENTES")
+def login_paciente():
 
-    if len(pacientes) == 0:
+    titulo("LOGIN PACIENTE")
 
-        print("Nenhum paciente.")
-        return
+    nome = input("Digite seu nome: ")
 
     for p in pacientes:
+        if p["nome"].lower() == nome.lower():
+            return nome
 
-        linha()
-        print("Nome:", p["nome"])
-        print("Idade:", p["idade"])
-        print("Telefone:", p["telefone"])
+    print("\nPaciente não cadastrado. Vamos cadastrar.")
+    cadastrar_paciente(nome)
+    return nome
 
 
-capa()
+def agendar_consulta(nome):
+
+    titulo("AGENDAR CONSULTA")
+
+    medico = input("Médico: ")
+    data = input("Data: ")
+    horario = input("Horário: ")
+
+    agendamentos.append({
+        "paciente": nome,
+        "medico": medico,
+        "data": data,
+        "horario": horario
+    })
+
+    print("Consulta agendada!")
+
+
+def ver_minhas_consultas(nome):
+
+    titulo("MINHAS CONSULTAS")
+
+    encontrou = False
+
+    for a in agendamentos:
+        if a["paciente"].lower() == nome.lower():
+            linha()
+            print("Médico:", a["medico"])
+            print("Data:", a["data"])
+            print("Horário:", a["horario"])
+            encontrou = True
+
+    if not encontrou:
+        print("Nenhuma consulta encontrada.")
+
+
+def ver_laudos(nome):
+
+    titulo("MEUS LAUDOS")
+
+    encontrou = False
+
+    for l in laudos:
+        if l["paciente"].lower() == nome.lower():
+            linha()
+            print("Médico:", l["medico"])
+            print("Laudo:", l["texto"])
+            encontrou = True
+
+    if not encontrou:
+        print("Nenhum laudo disponível.")
+
+
+def menu_paciente(nome):
+
+    while True:
+
+        titulo(f"PACIENTE: {nome}")
+
+        print("1 - Agendar consulta")
+        print("2 - Ver minhas consultas")
+        print("3 - Ver laudos")
+        print("0 - Sair")
+
+        op = input("Escolha: ")
+        limpar()
+
+        if op == "1":
+            agendar_consulta(nome)
+
+        elif op == "2":
+            ver_minhas_consultas(nome)
+
+        elif op == "3":
+            ver_laudos(nome)
+
+        elif op == "0":
+            sair()
+
+
+# =================================
+# MÉDICO
+# =================================
+
+def login_medico():
+
+    titulo("LOGIN MÉDICO")
+
+    nome = input("Nome do médico: ")
+    return nome
+
+
+def agenda_medico(nome):
+
+    titulo("AGENDA DO MÉDICO")
+
+    encontrou = False
+
+    for a in agendamentos:
+        if a["medico"].lower() == nome.lower():
+            linha()
+            print("Paciente:", a["paciente"])
+            print("Data:", a["data"])
+            print("Horário:", a["horario"])
+            encontrou = True
+
+    if not encontrou:
+        print("Nenhuma consulta.")
+
+
+def registrar_laudo(nome):
+
+    titulo("REGISTRAR LAUDO")
+
+    paciente = input("Paciente: ")
+    texto = input("Descrição: ")
+
+    laudos.append({
+        "paciente": paciente,
+        "medico": nome,
+        "texto": texto
+    })
+
+    print("Laudo registrado!")
+
+
+def menu_medico(nome):
+
+    while True:
+
+        titulo(f"MÉDICO: {nome}")
+
+        print("1 - Ver agenda")
+        print("2 - Registrar laudo")
+        print("0 - Sair")
+
+        op = input("Escolha: ")
+        limpar()
+
+        if op == "1":
+            agenda_medico(nome)
+
+        elif op == "2":
+            registrar_laudo(nome)
+
+        elif op == "0":
+            sair()
+
+
+# =================================
+# SISTEMA PRINCIPAL
+# =================================
 
 while True:
 
-    titulo("MENU PRINCIPAL")
+    titulo("SELECIONE O USUÁRIO")
 
-    print("1 - Cadastrar paciente")
-    print("2 - Cadastro em massa")
-    print("3 - Buscar paciente")
-    print("4 - Cadastrar médico")
-    print("5 - Cadastrar exame")
-    print("6 - Agendar consulta")
-    print("7 - Ver agendamentos")
-    print("8 - Histórico")
-    print("9 - Estatísticas")
-    print("10 - Listar pacientes")
-    print("11 - Sair")
+    print("1 - Secretária")
+    print("2 - Paciente")
+    print("3 - Médico")
+    print("0 - Sair")
 
-    linha()
-
-    opcao = input("Escolha: ")
-
+    op = input("Escolha: ")
     limpar()
 
-    if opcao == "1":
-        cadastrar_paciente()
+    if op == "1":
+        menu_secretaria()
 
-    elif opcao == "2":
-        cadastrar_pacientes_em_massa()
+    elif op == "2":
+        nome = login_paciente()
+        menu_paciente(nome)
 
-    elif opcao == "3":
-        buscar_paciente()
+    elif op == "3":
+        nome = login_medico()
+        menu_medico(nome)
 
-    elif opcao == "4":
-        cadastrar_medico()
-
-    elif opcao == "5":
-        cadastrar_exame()
-
-    elif opcao == "6":
-        agendar_consulta()
-
-    elif opcao == "7":
-        listar_agendamentos()
-
-    elif opcao == "8":
-        historico_pacientes()
-
-    elif opcao == "9":
-        estatisticas()
-
-    elif opcao == "10":
-        listar_pacientes()
-
-    elif opcao == "11":
-        print("Encerrando sistema...")
-        break
-
-    else:
-        print("Opção inválida.")
+    elif op == "0":
+        sair()
